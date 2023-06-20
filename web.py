@@ -3,9 +3,6 @@ import folium
 import streamlit_folium as stf
 import streamlit as st
 
-
-
-
 def get_marker_color(disp):
     if disp > 1:
         return 'green'
@@ -13,7 +10,6 @@ def get_marker_color(disp):
         return 'orange'
     else:
         return 'red'
-
 
 def get_marker_popup(station):
     lab = station['label']
@@ -33,18 +29,12 @@ def get_marker_popup(station):
     return popup
 
 
-
 st.set_page_config(
     page_title="eBCN",
     layout="wide",
 )
 
-
-
 st.markdown("# eBCN chargers", unsafe_allow_html=True)
-
-
-
 
 col1, col2 = st.columns([3,1])
 with col1:
@@ -61,15 +51,13 @@ else:
     n_charg = 2
 
 
-# Load the JSON data from the provided URL
 url = 'https://opendata-ajuntament.barcelona.cat/data/dataset/8cdafa08-d378-4bf1-aad4-fafffe815940/resource/e3732605-4944-44da-b8a0-701df2ba73c3/download'
 response = requests.get(url)
 data = response.json()
 
-# Create a Folium map centered on Barcelona
 m = folium.Map(location=[41.38879, 2.15899], zoom_start=13)
 ubis= []
-# Add markers to the map
+
 for ejemplo in data['locations']:
     empresa = ejemplo["network_name"]
     lat, lon = ejemplo["coordinates"]["latitude"], ejemplo["coordinates"]["longitude"]
@@ -95,8 +83,8 @@ for ejemplo in data['locations']:
             disponibles += 1
 
     if disponibles >= n_charg:
-        ubis.append((lat, lon))
-    # Aquí puedes realizar las operaciones que desees con los datos extraídos
+        ubis.append((lat, long))
+
     marker_color = get_marker_color(disponibles)
     marker_popup = get_marker_popup({
         'label': empresa,
@@ -118,15 +106,13 @@ if dire:
     if len(results) > 0:
         lat = float(results[0]['lat'])
         lon = float(results[0]['lon'])
-
-        # Agregar un marcador en la ubicación ingresada
-
+        
         folium.Marker(
             location=[lat, lon],
             icon=folium.Icon(color='blue'),
             popup=dire
         ).add_to(m)
-
+        
         closest_point = min(ubis, key=lambda p: ((p[0] - lat)**2 + (p[1] - lon)**2)**0.5)
 
         try:
@@ -138,10 +124,9 @@ if dire:
             route_style = {
                 'fillColor': 'blue',
                 'color': 'blue',
-                'weight': 5
+                'weight': 7
             }
 
-            # Agregar la ruta al mapa
             folium.GeoJson(
                 route_geometry,
                 style_function=lambda x: route_style
