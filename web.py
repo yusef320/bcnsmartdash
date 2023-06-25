@@ -28,13 +28,18 @@ def get_marker_popup(station):
     popup += f"<b>Hours: </b> {horario}<br>"
     popup += f"<b>Address:</b> {dir}<br>"
     popup += f"<b>Access: </b> {acceso}<br>"
-    popup += f"<b>Owner:</b> {lab}<br>"
+    popup += f"<b>Provider:</b> {lab}<br>"
 
     return popup
 
-def grafico_circular(rojos_porc, naranjas_porc, verdes_porc):
+
+def grafico_circular(rojos, naranjas, verdes):
+    #total = rojos + naranjas + verdes
+    #rojos_porc = rojos*100/total
+    #naranjas_porc = naranjas*100/total
+    #verdes_porc = verdes*100/total
     labels = ['No conn. availables', 'One conn. available', 'More than one conn. available']
-    valores = [rojos_porc, naranjas_porc, verdes_porc]
+    valores = [rojos, naranjas, verdes]
     colores = ['#d33d2a', '#f59630', '#71ae26']  # Rojo, naranja, verde
 
     # Crea la figura y el gráfico circular
@@ -64,7 +69,7 @@ data = response.json()
 
 
 # option to expand and view statistics
-with st.expander("**Statistics**"):
+with st.expander("**Network Statistics**"):
     disponibles_list, totales_list = [], []
     for ejemplo in data['locations']:
         disponibles = 0  # cargadores disponibles en esta estación
@@ -81,21 +86,19 @@ with st.expander("**Statistics**"):
             naranjas += 1
         else:
             verdes += 1
-    total = rojos + naranjas + verdes
-    rojos_porc = rojos*100/total
-    naranjas_porc = naranjas*100/total
-    verdes_porc = verdes*100/total
-    grafico_circular(rojos_porc, naranjas_porc, verdes_porc)
+    grafico_circular(rojos, naranjas, verdes)
 
 
-col1, col2 = st.columns([3,1])
+col1, col2, col3 = st.columns([3,1,1])
 with col1:
-    dire = st.text_input('Enter a street (or address if the street is very long) to get the route to the closest available charger', 'Carrer de Nicaragua')
+    dire = st.text_input('Enter a street (or address, if the street is very long) to get the route to the closest available charger', 'Carrer de Nicaragua')
     dire = dire + '. Barcelona, España'
 with col2:
     type_charger = st.selectbox(
         'Number of available connectors',
         ('At least one', 'More than one'))
+with col3:
+    map_width = st.slider('Map width', 400, 1400, value=1000)
 
 
 if type_charger == "At least one":
@@ -115,16 +118,16 @@ for ejemplo in data['locations']:
     acceso = ejemplo["access_restriction"]
 
     weekdays = {
-        1: "Lunes",
-        2: "Martes",
-        3: "Miércoles",
-        4: "Jueves",
-        5: "Viernes",
-        6: "Sábado",
-        7: "Domingo"
+        1: "Monday",
+        2: "Tuesday",
+        3: "Wednesday",
+        4: "Thursday",
+        5: "Friday",
+        6: "Saturday",
+        7: "Sunday"
     }
 
-    dias = weekdays[ejemplo["opening_hours"]["weekday_begin"]] + " a " + weekdays[ejemplo["opening_hours"]["weekday_end"]]
+    dias = "from " + weekdays[ejemplo["opening_hours"]["weekday_begin"]] + " to " + weekdays[ejemplo["opening_hours"]["weekday_end"]]
     horario = ejemplo["opening_hours"]["hour_begin"] + "-" + ejemplo["opening_hours"]["hour_end"]
 
     disponibles = 0  # cargadores disponibles en esta estación
@@ -144,7 +147,7 @@ for ejemplo in data['locations']:
         'horario':horario,
         'acceso': acceso
     })
-
+    
     folium.Marker(location=[lat, lon],icon=folium.Icon(color=marker_color,icon='plug', prefix='fa'), popup=marker_popup).add_to(m)
 
 
@@ -190,4 +193,4 @@ if dire:
 
 # show map
 with st.expander(" ", expanded=True):
-    stf.folium_static(m, width=1300, height=600)
+    stf.folium_static(m, width=map_width, height=600)
