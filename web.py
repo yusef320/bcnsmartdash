@@ -2,14 +2,14 @@ import requests
 import folium
 import streamlit_folium as stf
 import streamlit as st
-
+import plotly.graph_objects as go
 
 
 
 def get_marker_color(disp):
     if disp > 1:
         return 'green'
-    elif disp ==1:
+    elif disp == 1:
         return 'orange'
     else:
         return 'red'
@@ -23,15 +23,30 @@ def get_marker_popup(station):
     horario = station['horario']
     acceso = station['acceso']
 
-    popup = f"<b>Owner:</b> {lab}<br>"
-    popup += f"<b>Address:</b> {dir}<br>"
-    popup += f"<b>Available chargers:</b> {num}<br>"
+    popup = f"<b>Available chargers:</b> {num}<br>"
     popup += f"<b>Opening days: </b> {dias}<br>"
-    popup += f"<b>Hours : </b> {horario}<br>"
-    popup += f"<b>Type of access: </b> {acceso}<br>"
+    popup += f"<b>Hours: </b> {horario}<br>"
+    popup += f"<b>Address:</b> {dir}<br>"
+    popup += f"<b>Access: </b> {acceso}<br>"
+    popup += f"<b>Owner:</b> {lab}<br>"
 
     return popup
 
+
+def grafico_circular(rojos_porc, naranjas_porc, verdes_porc):
+    labels = ['No conn. availables', 'One conn. available', 'More than one conn. available']
+    valores = [rojos_porc, naranjas_porc, verdes_porc]
+    colores = ['#d33d2a', '#f59630', '#71ae26']  # Rojo, naranja, verde
+
+    # Crea la figura y el gráfico circular
+    fig = go.Figure(data=[go.Pie(labels=labels, values=valores, marker=dict(colors=colores))])
+
+    # Configura el diseño del gráfico
+    fig.update_layout(title_text="% of chargers by number of available connectors",
+                      title_x=0.3, legend_x=0.7)
+
+    # Muestra el gráfico interactivo
+    st.plotly_chart(fig)
 
 
 st.set_page_config(
@@ -40,31 +55,55 @@ st.set_page_config(
 )
 
 
-
 st.markdown("# eBCN chargers", unsafe_allow_html=True)
-
-
-
-
-col1, col2 = st.columns([3,1])
-with col1:
-    dire = st.text_input('Introduce an origin to get the route to the closet available charger', 'Example: Av. Diagonal, 467')
-with col2:
-    type_charger = st.selectbox(
-        ' ',
-        ('Atleast one available connector', 'More than one available connector'))
-
-
-if type_charger == "Atleast one available connector":
-    n_charg = 1
-else:
-    n_charg = 2
 
 
 # Load the JSON data from the provided URL
 url = 'https://opendata-ajuntament.barcelona.cat/data/dataset/8cdafa08-d378-4bf1-aad4-fafffe815940/resource/e3732605-4944-44da-b8a0-701df2ba73c3/download'
 response = requests.get(url)
 data = response.json()
+
+
+# option to expand and view statistics
+with st.expander("**Statistics**"):
+    disponibles_list, totales_list = [], []
+    for ejemplo in data['locations']:
+        disponibles = 0  # cargadores disponibles en esta estación
+        for estacion in ejemplo["stations"][0]["ports"]:
+            if estacion["port_status"][0]["status"] == "AVAILABLE":
+                disponibles += 1
+        disponibles_list.append(disponibles)
+        totales_list.append(len(ejemplo['stations'][0]['ports']))
+    rojos, naranjas, verdes = 0, 0, 0
+    for i in range(len(disponibles_list)):
+        if disponibles_list[i] == 0:    # no hay ningún conector disponible
+            rojos += 1
+        elif disponibles_list[i] == 1:
+            naranjas += 1
+        else:
+            verdes += 1
+    total = rojos + naranjas + verdes
+    rojos_porc = rojos*100/total
+    naranjas_porc = naranjas*100/total
+    verdes_porc = verdes*100/total
+    grafico_circular(rojos_porc, naranjas_porc, verdes_porc)
+
+
+col1, col2 = st.columns([3,1])
+with col1:
+    dire = st.text_input('Enter a street (or address if the street is very long) to get the route to the closest available charger', 'Carrer de Nicaragua')
+    dire = dire + '. Barcelona, España'
+with col2:
+    type_charger = st.selectbox(
+        'Number of available connectors',
+        ('At least one', 'More than one'))
+
+
+if type_charger == "At least one":
+    n_charg = 1
+else:
+    n_charg = 2
+
 
 # Create a Folium map centered on Barcelona
 m = folium.Map(location=[41.38879, 2.15899], zoom_start=13)
@@ -146,10 +185,10 @@ if dire:
                 route_geometry,
                 style_function=lambda x: route_style
             ).add_to(m)
-            bounds = folium.GeoJson(route_geometry).get_bounds()
-            center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2]
-            m.fit_bounds(route.get_bounds(), center=center)
         except:
             pass
 
-stf.folium_static(m, width=1300, height=600)
+
+# show map
+with st.expander(" ", expanded=True):
+    stf.folium_static(m, width=1300, height=600)
