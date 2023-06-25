@@ -32,7 +32,6 @@ def get_marker_popup(station):
 
     return popup
 
-@st.cache
 def grafico_circular(rojos_porc, naranjas_porc, verdes_porc):
     labels = ['No conn. availables', 'One conn. available', 'More than one conn. available']
     valores = [rojos_porc, naranjas_porc, verdes_porc]
