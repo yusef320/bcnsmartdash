@@ -45,7 +45,7 @@ def grafico_circular(rojos_porc, naranjas_porc, verdes_porc):
                       title_x=0.3, legend_x=0.7)
 
     # Muestra el gráfico interactivo
-    st.plotly_chart(fig)
+    #st.plotly_chart(fig)
 
 
 st.set_page_config(
