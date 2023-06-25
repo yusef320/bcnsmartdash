@@ -45,7 +45,7 @@ def grafico_circular(rojos_porc, naranjas_porc, verdes_porc):
                       title_x=0.3, legend_x=0.7)
 
     # Muestra el gráfico interactivo
-    #st.plotly_chart(fig)
+    st.plotly_chart(fig)
 
 
 st.set_page_config(
@@ -85,7 +85,7 @@ with st.expander("**Statistics**"):
     rojos_porc = rojos*100/total
     naranjas_porc = naranjas*100/total
     verdes_porc = verdes*100/total
-    grafico_circular(rojos_porc, naranjas_porc, verdes_porc)
+    #grafico_circular(rojos_porc, naranjas_porc, verdes_porc)
 
 
 col1, col2 = st.columns([3,1])
