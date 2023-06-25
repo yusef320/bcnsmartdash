@@ -98,7 +98,7 @@ with col2:
         'Number of available connectors',
         ('At least one', 'More than one'))
 with col3:
-    map_width = st.slider('Map width', 400, 1400, value=1000)
+    map_width = st.slider('Map width', 300, 1500, value=1000)
 
 
 if type_charger == "At least one":
