@@ -1,4 +1,3 @@
 folium
 streamlit_folium
 plotly
-plotly.graph_objects
