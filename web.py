@@ -33,7 +33,7 @@ def get_marker_popup(station):
     return popup
 
 
-def grafico_circular(rojos, naranjas, verdes):
+def grafico_circular(rojos, naranjas, verdes, graph_width):
     #total = rojos + naranjas + verdes
     #rojos_porc = rojos*100/total
     #naranjas_porc = naranjas*100/total
@@ -47,7 +47,7 @@ def grafico_circular(rojos, naranjas, verdes):
 
     # Configura el diseño del gráfico
     fig.update_layout(title_text="% of chargers by number of available connectors",
-                      title_x=0.3, legend_x=0.7)
+                      title_x=0.3, legend_x=0.7, width=graph_width*0.8)
 
     # Muestra el gráfico interactivo
     st.plotly_chart(fig)
@@ -69,7 +69,8 @@ data = response.json()
 
 
 # option to expand and view statistics
-with st.expander("**Network Statistics**"):
+with st.expander("**Network real-time statistics**"):
+    graph_width = st.slider('Graph width', 300, 1500, value=1000)
     disponibles_list, totales_list = [], []
     for ejemplo in data['locations']:
         disponibles = 0  # cargadores disponibles en esta estación
@@ -86,7 +87,7 @@ with st.expander("**Network Statistics**"):
             naranjas += 1
         else:
             verdes += 1
-    grafico_circular(rojos, naranjas, verdes)
+    grafico_circular(rojos, naranjas, verdes, graph_width)
 
 
 col1, col2, col3 = st.columns([3,1,1])
@@ -109,6 +110,7 @@ else:
 
 # Create a Folium map centered on Barcelona
 m = folium.Map(location=[41.38879, 2.15899], zoom_start=13)
+print('mapa creado')
 ubis= []
 # Add markers to the map
 for ejemplo in data['locations']:
@@ -189,7 +191,6 @@ if dire:
             ).add_to(m)
         except:
             pass
-
 
 # show map
 with st.expander(" ", expanded=True):
