@@ -205,11 +205,16 @@ for ejemplo in data['locations']:
         'num': f"{disponibles}/{len(ejemplo['stations'][0]['ports'])}",
         'dir': direccion,
         'dias': dias,
-        'horario':horario,
+        'horario': horario,
         'acceso': acceso
     })
     
-    folium.Marker(location=[lat, lon],icon=folium.Icon(color=marker_color,icon='plug', prefix='fa'), popup=marker_popup).add_to(m)
+    folium.Marker(
+        location=[lat, lon],
+        icon=folium.Icon(color=marker_color, icon='plug', prefix='fa'),
+        popup=folium.Popup(marker_popup, max_width=300)  # Ajusta el valor de max_width según tus necesidades
+    ).add_to(m)
+
 
 
 if dire:
