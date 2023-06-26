@@ -103,7 +103,7 @@ st.set_page_config(
 
 st.markdown("# eBCN chargers", unsafe_allow_html=True)
 
-st.write("Gazing at Barcelona's charger network as never before")
+st.write("A gaze at Barcelona's charger network as never before")
 
 
 # Load the JSON data from the provided URL
